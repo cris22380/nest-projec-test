@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { getModelToken } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserService } from './user.service';
-import { User, UserDocument, UserSchema } from './schemas/user.schema';
+import { User } from './schemas/user.schema';
 
 const mockUser = {
   _id: '6272bd051696dfbbcebf1acf',
   tutorial: { done: '1' },
   id: 'userid1',
-  username: null,
+  username: 'leila_test1@nest.com',
   email: 'leila_test1@nest.com',
   password: 'qwerty123',
   first: 'leila',

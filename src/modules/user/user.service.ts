@@ -14,6 +14,7 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = await this.userModel.create({
       ...createUserDto,
+      username: createUserDto.username.toLowerCase(),
       creationDate: new Date(),
     });
 
