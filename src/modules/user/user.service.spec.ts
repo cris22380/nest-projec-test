@@ -61,26 +61,25 @@ const usersArray = [
   },
 ];
 
+const MockModel = {
+  provide: getModelToken('User'),
+  useValue: {
+    new: jest.fn().mockResolvedValue(mockUser),
+    constructor: jest.fn().mockResolvedValue(mockUser),
+    find: jest.fn(),
+    create: jest.fn(),
+    findOne: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    exec: jest.fn(),
+  },
+};
+
 describe('UserService', () => {
   let service: UserService;
   let model: Model<User>;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserService,
-        {
-          provide: getModelToken('User'),
-          useValue: {
-            new: jest.fn().mockResolvedValue(mockUser),
-            constructor: jest.fn().mockResolvedValue(mockUser),
-            find: jest.fn(),
-            create: jest.fn(),
-            findOne: jest.fn(),
-            findOneAndUpdate: jest.fn(),
-            exec: jest.fn(),
-          },
-        },
-      ],
+      providers: [UserService, MockModel],
     }).compile();
 
     service = module.get<UserService>(UserService);
@@ -112,7 +111,7 @@ describe('UserService', () => {
       } as any);
 
       const updateUser = await service.findOneAndUpdate({
-        filterQuery: { id: mockUser.id },
+        queryParams: { id: mockUser.id },
         updateData: { username: 'user-name-test' },
       });
 
