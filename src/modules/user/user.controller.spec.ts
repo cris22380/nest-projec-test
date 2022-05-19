@@ -8,6 +8,7 @@ describe('UserController', () => {
   let service: UserService;
 
   const createUserDto: CreateUserDto = {
+    _id: '6272bd051696dfbbcebf1acf',
     username: 'user',
     email: 'user-test@test.com',
     password: '123456',

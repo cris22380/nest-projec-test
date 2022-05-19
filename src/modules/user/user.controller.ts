@@ -16,6 +16,7 @@ import { User } from './schemas/user.schema';
 import { LocalAuthGuard } from '#modules/auth/local-auth.guard';
 import { AuthenticatedGuard } from '#modules/auth/authenticated.guard';
 import * as bcrypt from 'bcrypt';
+import { IUserUpdate } from './interface/user.interfaces';
 
 @Controller('user')
 export class UserController {
@@ -32,6 +33,7 @@ export class UserController {
     const result = await this.userService.create({
       ...createUserDto,
       hashedPassword,
+      username: createUserDto.email,
     });
 
     return {
@@ -42,8 +44,15 @@ export class UserController {
   }
 
   @Put()
-  async findOneAndUpdate(@Body() query: Record<string, any>) {
-    await this.userService.findOneAndUpdate(query);
+  async findOneAndUpdate(@Body() query: IUserUpdate) {
+    const { queryParams, updateData } = query;
+    await this.userService.findOneAndUpdate({
+      queryParams,
+      updateData,
+    });
+    return {
+      userEdited: { id: queryParams.id, dataEdited: updateData },
+    };
   }
 
   @Get()
@@ -61,9 +70,10 @@ export class UserController {
     return this.userService.findOne({ username });
   }
 
-  @Delete(':id')
-  async delete(@Param('id') id: string) {
-    return this.userService.delete(id);
+  @Delete('/delete/:email')
+  async delete(@Param('email') email: string) {
+    this.userService.delete(email);
+    return { deletedUserByEmail: email };
   }
 
   @UseGuards(LocalAuthGuard)
@@ -73,14 +83,13 @@ export class UserController {
   }
 
   @UseGuards(AuthenticatedGuard)
-  @Get('/v1/protected')
+  @Get('/session/protected')
   getHello(@Request() req): string {
     return req.user;
   }
 
-  @Get('/v1/logout')
+  @Get('/session/logout')
   logout(@Request() req): any {
-    console.log(req.session, 'asdasdasdasd')
     req.session.destroy();
     return { msg: 'The user session has ended' };
   }
