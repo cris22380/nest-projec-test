@@ -5,6 +5,8 @@ import { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-User.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { IUserQuery, IUserUpdate } from './interface/user.interfaces';
+import * as bcrypt from 'bcrypt';
+import { pseudoRandomBytes } from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -13,6 +15,21 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const verifyEmail = await this.findOne({ email: createUserDto.email });
+
+    if (verifyEmail) {
+      throw new Error('email already used');
+    }
+
+    const userId = new Types.ObjectId();
+    const saltOrRounds = 10;
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltOrRounds,
+    );
+
+    const code = await pseudoRandomBytes(16).toString('hex');
+
     const userId = new Types.ObjectId();
     return await this.userModel.create({
       ...createUserDto,
@@ -20,6 +37,8 @@ export class UserService {
       creationDate: new Date(),
       _id: userId,
       id: userId.toHexString(),
+      hashedPassword,
+      code,
     });
   }
 
