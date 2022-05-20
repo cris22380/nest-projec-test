@@ -15,12 +15,6 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const verifyEmail = await this.findOne({ email: createUserDto.email });
-
-    if (verifyEmail) {
-      throw new Error('email already used');
-    }
-
     const userId = new Types.ObjectId();
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(
@@ -30,10 +24,9 @@ export class UserService {
 
     const code = await pseudoRandomBytes(16).toString('hex');
 
-    const userId = new Types.ObjectId();
     return await this.userModel.create({
       ...createUserDto,
-      username: createUserDto.username.toLowerCase(),
+      username: createUserDto.email.toLowerCase(),
       creationDate: new Date(),
       _id: userId,
       id: userId.toHexString(),
@@ -58,7 +51,7 @@ export class UserService {
       .exec();
   }
 
-  async delete(email: string) {
-    return await this.userModel.findOneAndDelete({ email }).exec();
+  async delete(id: string) {
+    return await this.userModel.findOneAndDelete({ id }).exec();
   }
 }

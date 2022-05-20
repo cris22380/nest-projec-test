@@ -67,7 +67,7 @@ const MockModel = {
     new: jest.fn().mockResolvedValue(mockUser),
     constructor: jest.fn().mockResolvedValue(mockUser),
     find: jest.fn(),
-    create: jest.fn(),
+    create: jest.fn().mockResolvedValue(mockUser),
     findOne: jest.fn(),
     findOneAndUpdate: jest.fn(),
     exec: jest.fn(),
@@ -101,6 +101,7 @@ describe('UserService', () => {
       );
       const newUser = await service.create({
         ...mockUser,
+        email: 'newUser@test.com',
       });
       expect(newUser).toEqual(mockUser);
     });

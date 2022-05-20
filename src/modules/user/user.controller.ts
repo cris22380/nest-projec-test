@@ -15,7 +15,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
 import { LocalAuthGuard } from '#modules/auth/local-auth.guard';
 import { AuthenticatedGuard } from '#modules/auth/authenticated.guard';
-import * as bcrypt from 'bcrypt';
 import { IUserUpdate } from './interface/user.interfaces';
 
 @Controller('user')
@@ -24,6 +23,13 @@ export class UserController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
+    const verifyEmail = await this.userService.findOne({
+      email: createUserDto.email,
+    });
+
+    if (verifyEmail) {
+      throw new Error('email already used');
+    }
     const result = await this.userService.create({
       ...createUserDto,
     });
@@ -36,14 +42,18 @@ export class UserController {
   }
 
   @Put()
-  async findOneAndUpdate(@Body() query: IUserUpdate) {
-    const { queryParams, updateData } = query;
+  async findOneAndUpdate(@Body() query: IUserUpdate, @Session() session: any) {
+    const { updateData } = query;
+    const {
+      passport: { user },
+    } = session;
+
     await this.userService.findOneAndUpdate({
-      queryParams,
+      queryParams: { id: user.id },
       updateData,
     });
     return {
-      userEdited: { id: queryParams.id, dataEdited: updateData },
+      userEdited: { id: user.id, dataEdited: updateData },
     };
   }
 
@@ -62,10 +72,10 @@ export class UserController {
     return this.userService.findOne({ username });
   }
 
-  @Delete('/delete/:email')
-  async delete(@Param('email') email: string) {
-    this.userService.delete(email);
-    return { deletedUserByEmail: email };
+  @Delete('/:id')
+  async delete(@Param('id') id: string) {
+    this.userService.delete(id);
+    return { deletedUserByid: id };
   }
 
   @UseGuards(LocalAuthGuard)
