@@ -30,6 +30,7 @@ export class UserService {
 
     const code = await pseudoRandomBytes(16).toString('hex');
 
+    const userId = new Types.ObjectId();
     return await this.userModel.create({
       ...createUserDto,
       username: createUserDto.username.toLowerCase(),
